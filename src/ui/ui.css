@@ -1,0 +1,1577 @@
+:root {
+  --bg: #e6e7ee;
+  --card: #ffffff;
+  --line: #d7d8e3;
+  --line-soft: #ececf3;
+  --chip: #f1f1f7;
+  --ink: #25263a;
+  --muted: #6b6d86;
+  --faint: #9a9cb3;
+  --accent: #5b5bd6;
+  --accent-hover: #4b4bc4;
+  --danger: #d9483b;
+  --success: #12805c;
+  --font-sans: 'IBM Plex Sans KR', system-ui, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+  /* 코드 에디터: 한글 주석도 글자 폭이 고르게 맞는 고정폭 글꼴 */
+  --font-code: 'Nanum Gothic Coding', 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ───────── 전체 틀: 상단바 / 본문 / footer ───────── */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 18px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.logo-mark {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* 흰 돌: 검은 돌 옆에 겹쳐 놓은 모양 */
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-sizing: border-box;
+}
+
+.logo-mark-large {
+  width: 34px;
+  height: 34px;
+  margin: 0 18px 0 0;
+}
+
+.logo-mark-large::after {
+  left: 18px;
+  top: 14px;
+  width: 34px;
+  height: 34px;
+}
+
+.modes {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: #eeeef5;
+  border-radius: 8px;
+}
+
+.mode {
+  padding: 5px 13px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.mode:hover:not(:disabled):not(.on) {
+  color: var(--ink);
+}
+
+.mode.on {
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.mode:disabled {
+  cursor: not-allowed;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  padding: 6px 18px;
+  text-align: center;
+}
+
+.footer small {
+  font-size: 0.7rem;
+}
+
+/* ───────── 카드와 버튼 ───────── */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+/* 코드 카드 제목줄: 파일 이름 ····· reset */
+.card-title-file {
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* 코드 글자 크기 조절 */
+/* 에디터 오른쪽 아래에 떠 있다 */
+.zoom {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  box-shadow: 0 2px 8px rgba(37, 38, 58, 0.12);
+}
+
+.btn-zoom {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  font: 600 0.95rem var(--font-sans);
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.btn-zoom:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-zoom:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.zoom-size {
+  min-width: 2.2em;
+  text-align: center;
+  font: 600 0.72rem var(--font-mono);
+  color: var(--muted);
+}
+
+.btn-reset {
+  margin-left: auto;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  font: 600 0.75rem var(--font-mono);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.btn-reset:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-outline {
+  border-color: var(--line);
+  background: var(--card);
+  font-weight: 500;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--chip);
+}
+
+.btn-outline:disabled {
+  opacity: 0.5;
+}
+
+.btn-stop {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-stop:hover {
+  background: #c43a2e;
+}
+
+.btn-dashed {
+  border: 1px dashed #c8c9d8;
+  color: var(--faint);
+  font-weight: 400;
+}
+
+/* ───────── title ───────── */
+.title-stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 40px 16px;
+}
+
+.title-card {
+  width: min(460px, 100%);
+  padding: 44px 40px;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  box-shadow: 0 12px 40px rgba(37, 38, 58, 0.12);
+}
+
+.title-card .logo-mark-large {
+  margin-bottom: 14px;
+  margin-right: 34px;
+}
+
+.title-name {
+  margin: 0;
+  font-size: 2.8rem;
+  font-weight: 900;
+}
+
+.title-tagline {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+/* ───────── 연습 화면: 코드 | 대국 | 설정과 로그 ───────── */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 340px;
+  grid-template-areas: 'code stage side';
+  gap: 12px;
+  flex: 1;
+  width: 100%;
+  padding: 12px;
+  align-items: stretch;
+}
+
+/* 넓은 화면: 세 패널이 상단바와 footer 사이를 가로 세로로 꽉 채우고, 넘치는 내용은 각 패널 안에서 스크롤한다 */
+@media (min-width: 1101px) {
+  .app {
+    height: max(100vh, 640px);
+  }
+  .main {
+    min-height: 0;
+  }
+  .cols {
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .editor-wrap {
+    min-height: 0;
+  }
+}
+
+.card-code {
+  grid-area: code;
+}
+
+.card-stage {
+  grid-area: stage;
+}
+
+.card-side {
+  grid-area: side;
+}
+
+/* 중간 폭: 코드와 설정을 윗줄에, 대국을 아랫줄에 넓게 */
+@media (max-width: 1100px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-areas:
+      'code side'
+      'stage stage';
+  }
+}
+
+/* 좁은 폭: 한 줄로 */
+@media (max-width: 820px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'code'
+      'stage'
+      'side';
+  }
+}
+
+.help {
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.9rem;
+}
+
+.help summary {
+  padding: 9px 14px;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* 작성법: 항목마다 한 줄 */
+.help-body {
+  margin: 0;
+  padding: 0 14px 12px 16px;
+  list-style: none;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.help-body li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.help code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--chip);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* 에디터가 카드의 남는 높이를 모두 차지한다 (길어지면 안에서 스크롤) */
+.editor-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 380px;
+}
+
+.editor-fill {
+  position: absolute;
+  inset: 0;
+}
+
+.editor-fill .cm-theme-light,
+.editor-fill .cm-editor {
+  height: 100%;
+}
+
+/* 가운데: 이름판, 결과, 판 */
+.plates {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+
+.plate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--chip);
+  font-weight: 700;
+}
+
+.plate span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plate-on {
+  background: var(--accent);
+  color: #fff;
+}
+
+.plate-stone {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.plate-black {
+  background: #101014;
+  border: 1px solid #8a8aa0;
+}
+
+.plate-white {
+  background: #fff;
+  border: 1px solid #9a9cb3;
+}
+
+.plate-move {
+  font: 700 0.85rem var(--font-mono);
+  color: var(--muted);
+}
+
+.banner {
+  min-height: 2em;
+  padding: 8px 16px 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.board-wrap {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 10px 16px 16px;
+}
+
+.board {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* 판은 가로를 꽉 채우되, 화면 높이를 넘지 않도록 높이로 제한한다 */
+  max-height: max(260px, calc(100vh - 470px));
+}
+
+.board-bg {
+  fill: #f3e8cd;
+}
+
+.board-lines line {
+  stroke: #bba67a;
+  stroke-width: 1.1;
+}
+
+.board-star {
+  fill: #bba67a;
+}
+
+.stone-last {
+  fill: var(--accent);
+}
+
+.stone-win {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.foul-mark line {
+  stroke: var(--danger);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+/* 오른쪽: 설정과 로그 */
+.ctrl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.ctrl .btn {
+  padding: 8px 14px;
+}
+
+.ctrl label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* 속도 슬라이더: 단계마다 원 모양 홈이 있고 손잡이(원)가 그 안에 들어간다.
+   --thumb: 손잡이 지름, --stop: 홈 지름. 홈과 이름의 가로 위치는 모두 같은 식을 쓴다:
+   손잡이 중심이 움직이는 범위(양끝에서 손잡이 반지름만큼 안쪽)를 (단계 수 - 1)등분한 지점 */
+.speed {
+  --thumb: 14px;
+  --stop: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ctrl .speed label {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.speed-now {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.speed-rail,
+.speed-labels {
+  position: relative;
+  margin: 0 28px; /* 양끝 이름이 패널 밖으로 잘리지 않도록 안쪽으로 모은다 */
+}
+
+.speed-rail {
+  height: 28px;
+}
+
+.speed-track,
+.speed-fill {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--thumb) / 2);
+  height: 4px;
+  border-radius: 2px;
+  transform: translateY(-50%);
+}
+
+.speed-track {
+  right: calc(var(--thumb) / 2);
+  background: var(--line);
+}
+
+.speed-fill {
+  width: calc((100% - var(--thumb)) * var(--i) / var(--max));
+  background: var(--accent);
+}
+
+/* 단계마다 있는 원 모양 홈 */
+.speed-stop {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--k) / var(--max));
+  width: var(--stop);
+  height: var(--stop);
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--card);
+  transform: translate(-50%, -50%);
+}
+
+.speed-stop.reached {
+  border-color: var(--accent);
+}
+
+/* 실제 입력: 투명한 바탕 위에 손잡이만 보인다 */
+.speed-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.speed-slider::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((28px - var(--thumb)) / 2);
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(37, 38, 58, 0.35);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.speed-slider::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.speed-slider::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(37, 38, 58, 0.35);
+}
+
+.speed-slider:focus-visible {
+  outline: none;
+}
+
+.speed-slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.speed-slider:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* 단계 이름: 홈의 가로 중심과 같은 위치에 가운데 정렬 */
+.speed-labels {
+  height: 1.1rem;
+}
+
+.speed-labels span {
+  position: absolute;
+  top: 0;
+  left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--k) / var(--max));
+  font-size: 0.72rem;
+  line-height: 1.1rem;
+  color: var(--faint);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.speed-labels span.on {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.ctrl select {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font: inherit;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.ctrl select:disabled {
+  opacity: 0.55;
+}
+
+.stage-log {
+  border-top: 1px solid var(--line-soft);
+}
+
+.stage-log .log {
+  flex: none;
+  height: 170px;
+  min-height: 170px;
+}
+
+/* ───────── 로그 ───────── */
+.log {
+  flex: 1;
+  min-height: 180px;
+  overflow-y: auto;
+  padding: 6px 8px;
+  background: #fafafc;
+  font-size: 0.82rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.log:focus-visible {
+  outline-offset: -2px;
+}
+
+/* 타임라인: 세로 줄 위에 사건이 차례로 이어진다. 수는 돌 모양 점, 알릴 일은 색이 있는 큰 점 */
+.log-timeline {
+  position: relative;
+  padding: 4px 4px 4px 0;
+}
+
+.log-timeline::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 17px;
+  width: 2px;
+  background: var(--line);
+}
+
+.log-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 3px 8px 3px 40px;
+  border-radius: 8px;
+  animation: log-in 0.25s ease-out;
+}
+
+@keyframes log-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 줄 위의 점. 바탕색 테두리로 세로 줄을 끊어 보이게 한다 */
+.log-node {
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fafafc;
+  box-shadow: 0 0 0 3px #fafafc;
+  font: 800 0.66rem var(--font-sans);
+  color: #fff;
+  transform: translateY(-50%);
+}
+
+/* 이동 기록: 점(돌) · 번호 · 이름 · 좌표 */
+.log-move:hover {
+  background: var(--chip);
+}
+
+.log-no {
+  flex: none;
+  width: 2em;
+  text-align: right;
+  font: 600 0.75rem var(--font-mono);
+  color: var(--faint);
+}
+
+.log-stone {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.log-stone-black {
+  border: 1px solid #2b2b33;
+  background: radial-gradient(circle at 35% 32%, #5b5b62, #101014);
+}
+
+.log-stone-white {
+  border: 1px solid #b5b7cc;
+  background: radial-gradient(circle at 35% 32%, #fff, #e6e6f0);
+}
+
+.log-who {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-coord {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--chip);
+  font: 500 0.75rem var(--font-mono);
+  color: var(--muted);
+}
+
+.log-message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* 안내 */
+.log-info {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.log-node-info {
+  left: 13px;
+  width: 10px;
+  height: 10px;
+  background: var(--faint);
+}
+
+/* 사건 줄: 위아래로 여백을 두어 수 기록과 구분한다 */
+.log-print,
+.log-error,
+.log-result {
+  margin: 4px 0;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+/* print 출력 */
+.log-print {
+  background: #f3f7ff;
+}
+
+.log-node-print {
+  background: #2563eb;
+  box-shadow: 0 0 0 3px #fafafc;
+  font-family: var(--font-mono);
+}
+
+.log-print-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font: 0.78rem var(--font-mono);
+  color: #1d4ec2;
+}
+
+/* 오류와 반칙 */
+.log-error {
+  background: #fdeceb;
+  font-weight: 600;
+  color: #a3281d;
+}
+
+.log-node-error {
+  background: var(--danger);
+}
+
+/* 결과 */
+.log-result {
+  background: linear-gradient(90deg, #ececff, #f6f6ff);
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.log-node-result {
+  background: var(--accent);
+}
+
+/* 비어 있을 때 */
+.log-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 110px;
+  font-size: 0.82rem;
+  color: var(--faint);
+}
+
+.log-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--chip);
+  font-size: 0.7rem;
+  color: var(--faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .log-row {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* 오른쪽 아래: 규칙 (금지된 수) 블록 */
+.rules {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 14px 14px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.rules p {
+  margin: 0 0 8px;
+}
+
+/* bullet은 흑돌 아이콘으로 그린다 (작성법, 규칙 안내 공통) */
+.help-body li::before,
+.rules-notes li::before {
+  content: '';
+  display: inline-block;
+  position: relative;
+  top: -1px;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #5b5b62, #101014);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  vertical-align: middle;
+}
+
+/* 규칙 패널의 설명은 모두 한 줄로 보여준다 */
+.rules-notes {
+  margin: 0 0 10px;
+  padding-left: 2px;
+  list-style: none;
+  font-size: 0.78rem;
+}
+
+.rules-notes li,
+.rule-text > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rules-notes li + li {
+  margin-top: 2px;
+}
+
+.rule-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 블록 네 개가 패널의 남는 높이를 똑같이 나눠 가져서 아래에 빈칸이 남지 않는다 */
+.rule-list > li {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.rule-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.rule-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px rgba(91, 91, 214, 0.15);
+}
+
+.rule-thumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+}
+
+.rule-thumb .rb {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rule-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rule-text b {
+  font-size: 0.88rem;
+}
+
+.rule-text span {
+  color: var(--muted);
+}
+
+/* ───────── 금수 설명 그림 (미니 판) ───────── */
+.rb-bg {
+  fill: #f3e8cd;
+}
+
+.rb-grid line {
+  stroke: #bba67a;
+  stroke-width: 1.1;
+}
+
+.rb-stone {
+  filter: drop-shadow(0 1.5px 1.5px rgba(0, 0, 0, 0.3));
+}
+
+.rb-pop {
+  animation: rb-pop 0.35s ease-out both;
+}
+
+.rb-drop {
+  animation: rb-drop 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.rb-target circle {
+  fill: rgba(91, 91, 214, 0.12);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 4;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rb-pulse 1s ease-in-out infinite;
+}
+
+.rb-target text {
+  fill: var(--accent);
+  font: 700 20px var(--font-sans);
+}
+
+.rb-line line {
+  stroke-width: 24;
+  stroke-linecap: round;
+  animation: rb-fade-line 0.5s ease-out both;
+}
+
+.rb-line rect {
+  animation: rb-fade 0.5s ease-out both;
+}
+
+.rb-line text {
+  fill: #fff;
+  font: 700 13px var(--font-sans);
+}
+
+.rb-line.rb-danger line {
+  stroke: var(--danger);
+}
+
+.rb-line.rb-danger rect {
+  fill: var(--danger);
+}
+
+.rb-line.rb-ok line {
+  stroke: var(--success);
+}
+
+.rb-line.rb-ok rect {
+  fill: var(--success);
+}
+
+.rb-verdict circle {
+  fill: none;
+  stroke-width: 3.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rb-ring 0.5s ease-out both;
+}
+
+.rb-verdict line,
+.rb-verdict path {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  animation: rb-draw 0.45s 0.15s ease-out both;
+}
+
+.rb-verdict.rb-danger {
+  stroke: var(--danger);
+}
+
+.rb-verdict.rb-ok {
+  stroke: var(--success);
+}
+
+@keyframes rb-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rb-drop {
+  from {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.16);
+  }
+}
+
+@keyframes rb-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rb-fade-line {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.28;
+  }
+}
+
+@keyframes rb-ring {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rb-draw {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ───────── 금수 설명 팝업 ───────── */
+.rule-dialog {
+  width: min(960px, calc(100vw - 24px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(37, 38, 58, 0.35);
+  overflow: hidden;
+}
+
+.rule-dialog::backdrop {
+  background: rgba(37, 38, 58, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.rule-dialog[open] {
+  animation: rule-dialog-in 0.22s ease-out;
+}
+
+@keyframes rule-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rule-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+}
+
+.rule-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.rule-modal-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.rule-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--chip);
+  font-size: 1rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.rule-close:hover {
+  background: var(--line);
+}
+
+.rule-modal-body {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 20px;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.rule-modal-board .rb {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rule-modal-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rule-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rule-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.rule-step-no {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--chip);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.rule-step.on {
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.rule-step.on .rule-step-no {
+  background: var(--accent);
+  color: #fff;
+}
+
+.rule-step.done .rule-step-no {
+  background: #c9c9ee;
+  color: var(--ink);
+}
+
+.rule-caption {
+  margin: 0;
+  min-height: 2.9em;
+  white-space: nowrap;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--chip);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.rule-caption.bad {
+  background: #fdeceb;
+  color: #a3281d;
+  font-weight: 700;
+}
+
+.rule-caption.good {
+  background: #e4f5ee;
+  color: #0e6b4c;
+  font-weight: 700;
+}
+
+.rule-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rule-controls .btn {
+  padding: 7px 12px;
+  font-size: 0.85rem;
+}
+
+.rule-details {
+  margin: 0;
+  white-space: nowrap;
+  padding-left: 1.2em;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 960px) {
+  /* 좁은 화면에서는 한 줄에 다 들어갈 수 없으므로 줄바꿈을 허용한다 */
+  .rule-caption,
+  .rule-details {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 720px) {
+  .rule-modal-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rule-modal-board {
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+}
+
+/* 모션 줄이기 설정: 그림은 움직이지 않고 결과 상태만 보여준다 */
+@media (prefers-reduced-motion: reduce) {
+  .rb *,
+  .rule-dialog[open] {
+    animation: none !important;
+  }
+}
+
+/* ───────── 결과 팝업 ───────── */
+.result-dialog {
+  width: min(380px, calc(100vw - 24px));
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(37, 38, 58, 0.35);
+  overflow: hidden;
+}
+
+.result-dialog::backdrop {
+  background: rgba(37, 38, 58, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.result-dialog[open] {
+  animation: result-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.result-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 28px 24px;
+  text-align: center;
+}
+
+/* 이긴 쪽의 돌. 내 코드가 이기면 주위에 퍼지는 고리가 반짝인다 */
+.result-stone {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.result-stone-black {
+  background: radial-gradient(circle at 35% 32%, #5b5b62, #101014);
+}
+
+.result-stone-white {
+  border: 1px solid #b5b7cc;
+  background: radial-gradient(circle at 35% 32%, #fff, #e6e6f0);
+}
+
+.result-won .result-stone::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: result-ring 1.6s ease-out infinite;
+}
+
+@keyframes result-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.result-headline {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.result-won .result-headline {
+  color: var(--accent);
+}
+
+.result-reason {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.result-meta {
+  margin: 0 0 14px;
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+
+.result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-dialog[open],
+  .result-won .result-stone::after {
+    animation: none;
+  }
+}
