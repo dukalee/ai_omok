@@ -136,7 +136,7 @@ describe('formatEvent', () => {
       { kind: 'result', text: 'AI 중 승리 (판이 가득 차서 백 승리)' },
     ])
     expect(formatEvent({ type: 'end', winner: 2, reason: 'foul', line: null }, names)).toEqual([
-      { kind: 'result', text: 'AI 중 승리 (상대 반칙)' },
+      { kind: 'result', text: 'AI 중 승리 (Player 반칙패)' },
     ])
   })
 })

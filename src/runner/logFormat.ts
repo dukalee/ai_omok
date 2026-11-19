@@ -72,7 +72,7 @@ export function formatEvent(event: GameEvent, names: PlayerNames): LogLine[] {
     case 'end': {
       // 오목을 완성한 보통의 승리는 덧붙이는 말 없이 "<이름> 승리"만 보여준다
       const reason =
-        event.reason === 'full' ? ' (판이 가득 차서 백 승리)' : event.reason === 'foul' ? ' (상대 반칙)' : ''
+        event.reason === 'full' ? ' (판이 가득 차서 백 승리)' : event.reason === 'foul' ? ` (${nameOf(event.winner === 1 ? 2 : 1)} 반칙패)` : ''
       return [{ kind: 'result', text: `${nameOf(event.winner)} 승리${reason}` }]
     }
   }

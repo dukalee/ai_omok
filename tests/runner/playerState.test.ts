@@ -45,9 +45,22 @@ describe('buildPlayerState', () => {
     ])
   })
 
-  test('state에는 문서에 적은 다섯 항목만 있다 (둘 수 있는 자리 목록은 주지 않는다)', () => {
+  test('my_last_move는 내가 마지막으로 둔 수이고, 내 첫 수면 null이다', () => {
+    const g = new Game()
+    expect(buildPlayerState(g, 1).my_last_move).toBeNull()
+    g.play({ row: 7, col: 7 })
+    expect(buildPlayerState(g, 2).my_last_move).toBeNull()
+    g.play({ row: 7, col: 8 })
+    g.play({ row: 8, col: 7 })
+    const white = buildPlayerState(g, 2)
+    expect(white.my_last_move).toEqual([7, 8])
+    expect(white.last_move).toEqual([8, 7])
+    expect(buildPlayerState(g, 1).my_last_move).toEqual([8, 7])
+  })
+
+  test('state에는 문서에 적은 여섯 항목만 있다 (둘 수 있는 자리 목록은 주지 않는다)', () => {
     const state = buildPlayerState(new Game(), 1)
-    expect(Object.keys(state).sort()).toEqual(['board', 'history', 'last_move', 'move_number', 'my_color'])
+    expect(Object.keys(state).sort()).toEqual(['board', 'history', 'last_move', 'move_number', 'my_color', 'my_last_move'])
     expect(state).not.toHaveProperty('legal_moves')
   })
 

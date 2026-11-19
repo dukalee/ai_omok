@@ -12,6 +12,8 @@ export interface PlayerState {
   move_number: number
   /** 상대가 마지막으로 둔 (행, 열). 첫 수면 null */
   last_move: [number, number] | null
+  /** 내가 마지막으로 둔 (행, 열). 내 첫 수면 null */
+  my_last_move: [number, number] | null
   history: { color: 'black' | 'white'; move: [number, number] }[]
 }
 

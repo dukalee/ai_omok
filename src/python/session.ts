@@ -17,9 +17,14 @@ const internal = (message: string): { ok: false; failure: PlayerFailure } => ({
   failure: { kind: 'internal', message },
 })
 
-/** 학습자 코드에는 board와 last_move만 준다. 색, 수 번호, 기록은 내부용(AI)이라 넘기지 않는다. */
+/** 학습자 코드에는 board, last_move, my_last_move, my_color만 준다. 수 번호, 기록은 내부용(AI)이라 넘기지 않는다. */
 function toLearnerState(state: PlayerState) {
-  return { board: state.board, last_move: state.last_move }
+  return {
+    board: state.board,
+    last_move: state.last_move,
+    my_last_move: state.my_last_move,
+    my_color: state.my_color,
+  }
 }
 
 function parse(text: unknown): Record<string, unknown> | null {

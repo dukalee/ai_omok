@@ -198,17 +198,27 @@ describe('choose', () => {
     expect(whiteTurn.ok && whiteTurn.stdout).toContain('(7, 7)')
   })
 
-  test('state에는 board와 last_move 두 항목만 있다 (my_color, move_number, history, legal_moves 없음)', () => {
+  test('state에는 board, last_move, my_last_move, my_color 네 항목만 있다 (move_number, history, legal_moves 없음)', () => {
     loadOk(
       'def play(state):\n' +
         '    keys = sorted(state.keys())\n' +
-        '    ok = state["last_move"] is None\n' +
-        '    print(keys, ok)\n' +
+        '    ok = state["last_move"] is None and state["my_last_move"] is None\n' +
+        '    print(keys, ok, state["my_color"])\n' +
         '    return (0, 0)\n',
     )
     const result = session.choose(emptyState())
     expect(result.ok && result.stdout).toContain(
-      "['board', 'last_move'] True",
+      "['board', 'last_move', 'my_color', 'my_last_move'] True black",
     )
+  })
+
+  test('my_last_move는 내가 마지막으로 둔 돌의 (행, 열) 튜플이다', () => {
+    loadOk('def play(state):\n    print(state["my_last_move"], state["last_move"])\n    return (0, 0)\n')
+    const g = new Game()
+    g.play({ row: 7, col: 7 }) // 흑
+    g.play({ row: 7, col: 8 }) // 백
+    g.play({ row: 8, col: 7 }) // 흑
+    const result = session.choose(buildPlayerState(g, 2)) // 백: 내 마지막 (7, 8), 상대 마지막 (8, 7)
+    expect(result.ok && result.stdout).toContain('(7, 8) (8, 7)')
   })
 })
