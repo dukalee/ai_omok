@@ -98,40 +98,6 @@ body {
   height: 34px;
 }
 
-.modes {
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  background: #eeeef5;
-  border-radius: 8px;
-}
-
-.mode {
-  padding: 5px 13px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  font: inherit;
-  font-size: 0.9rem;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.mode:hover:not(:disabled):not(.on) {
-  color: var(--ink);
-}
-
-.mode.on {
-  background: var(--card);
-  color: var(--ink);
-  font-weight: 700;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-}
-
-.mode:disabled {
-  cursor: not-allowed;
-}
-
 .main {
   flex: 1;
   display: flex;
@@ -261,6 +227,7 @@ body {
 
 .btn:disabled {
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .btn-block {
@@ -1574,4 +1541,737 @@ body {
   .result-won .result-stone::after {
     animation: none;
   }
+}
+
+/* 튜토리얼 레벨 목록: 커버플로 */
+.cf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(1160px, 100%);
+  text-align: center;
+  outline: none;
+}
+
+.cf:focus-visible .cf-card-on {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.cf-title {
+  font-size: 1.8rem;
+}
+
+.cf-stage {
+  position: relative;
+  width: 100%;
+  height: 540px;
+  margin-top: 10px;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.cf-card {
+  --gap: 300px;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 380px;
+  margin-left: -190px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 10px 30px rgba(37, 38, 58, 0.16);
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  filter: brightness(0.93);
+  transform: translateX(calc(var(--o) * var(--gap))) translateZ(calc(var(--abs) * -180px))
+    rotateY(calc(var(--s) * -45deg));
+  transition:
+    transform 0.45s cubic-bezier(0.22, 0.8, 0.3, 1),
+    opacity 0.3s,
+    filter 0.3s;
+}
+
+.cf-card-on {
+  border-color: var(--accent);
+  filter: none;
+  box-shadow: 0 16px 40px rgba(76, 72, 196, 0.28);
+}
+
+.cf-board .board {
+  max-height: none;
+  border-radius: 8px;
+}
+
+.cf-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.cf-mission {
+  max-width: 520px;
+  min-height: 3em;
+  margin: 8px 0 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.cf-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.cf-controls .btn {
+  min-width: 48px;
+}
+
+.level-no {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--chip);
+  font-weight: 800;
+}
+
+.level-no-done {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .cf-card {
+    --gap: 180px;
+    width: 300px;
+    margin-left: -150px;
+  }
+  .cf-stage {
+    height: 460px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-card {
+    transition: none;
+  }
+}
+
+/* 타이틀 화면의 로그인 / 회원가입 */
+.title-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.auth-link,
+.auth-switch {
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.auth-link:hover,
+.auth-switch:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.title-auth-name b {
+  color: var(--ink);
+}
+
+/* 로그인 / 회원가입 팝업 */
+.auth-dialog {
+  font-family: var(--font-sans);
+  width: min(360px, calc(100vw - 24px));
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 24px 20px;
+}
+
+.auth-title {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.auth-field input {
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font: inherit;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.auth-field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.auth-error {
+  min-height: 1.3em;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+
+/* 관리자 화면 */
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(960px, 100%);
+  margin: 0 auto;
+  padding: 16px 12px;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table th {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.admin-actions {
+  text-align: right !important;
+}
+
+.admin-badge {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.admin-empty,
+.admin-error {
+  padding: 16px 14px;
+  color: var(--muted);
+  text-align: center !important;
+}
+
+.admin-error {
+  color: var(--danger);
+}
+
+.btn-reset-danger {
+  margin-left: 0;
+  color: var(--danger);
+}
+
+.btn-reset-danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.confirm-message {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* 표와 폼 라벨도 앱 글꼴을 쓴다 */
+.admin-table,
+.auth-field,
+.auth-form {
+  font-family: var(--font-sans);
+}
+
+/* 관리자: 탭, 토너먼트 */
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-tab {
+  padding: 7px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-tab.on {
+  border-color: var(--accent);
+  background: var(--accent);
+  font-weight: 700;
+  color: #fff;
+}
+
+.admin-page {
+  width: min(1100px, 100%);
+}
+
+.admin-tournaments {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .admin-tournaments {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.admin-create {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px 4px;
+}
+
+.admin-create input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font: inherit;
+  color: var(--ink);
+}
+
+.admin-create .btn {
+  padding: 8px 14px;
+}
+
+.admin-hint {
+  margin: 0;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.admin-list,
+.entry-list {
+  margin: 0;
+  padding: 0 0 6px;
+  list-style: none;
+}
+
+.admin-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+  background: none;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-item:hover,
+.admin-item.on {
+  background: var(--chip);
+}
+
+.entry-list li {
+  padding: 7px 14px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.88rem;
+}
+
+.entry-list small {
+  margin-left: 8px;
+  color: var(--faint);
+}
+
+.admin-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px 4px;
+}
+
+.admin-controls .btn {
+  padding: 8px 14px;
+}
+
+.status {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--chip);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.status-open {
+  background: #e3f4ec;
+  color: var(--success);
+}
+
+.status-running {
+  background: #e6e6fb;
+  color: var(--accent);
+}
+
+.status-stopped {
+  background: #fbe9e6;
+  color: var(--danger);
+}
+
+.admin-log {
+  max-height: 180px;
+  margin: 0;
+  padding: 10px 14px;
+  overflow: auto;
+  font: 0.78rem/1.6 var(--font-mono);
+  white-space: pre-wrap;
+}
+
+/* 대진표 */
+.bracket-wrap {
+  padding: 12px 14px 16px;
+  overflow-x: auto;
+}
+
+.bracket-empty {
+  margin: 0;
+  padding: 14px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.bracket-champion {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.bracket {
+  display: flex;
+  gap: 18px;
+  min-width: min-content;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.bracket-round h5 {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.bracket-match {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.bracket-running {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(91, 91, 214, 0.18);
+}
+
+.bracket-player {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.bracket-player + .bracket-player {
+  border-top: 1px solid var(--line-soft);
+}
+
+.bracket-win {
+  background: #eeeefc;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.bracket-lose {
+  color: var(--faint);
+}
+
+.bracket-tag {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  padding: 0 6px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.admin-ok {
+  margin: 0;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  color: var(--success);
+}
+
+/* 상단바 오른쪽: 처음 화면으로 돌아가기 */
+.topbar-back {
+  margin-left: auto;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.topbar-back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.title-lock {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* 시작 화면: 왼쪽 브랜드, 오른쪽 로그인 폼 또는 모드 메뉴 */
+.title-split {
+  /* 창을 가득 채우지 않고, 가운데에 놓인 작은 카드 크기로 둔다 */
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(1120px, calc(100% - 32px));
+  /* 화면 높이에 맞추되 440~610px (부모 높이가 정해지지 않아 %를 쓸 수 없다) */
+  height: clamp(440px, calc(100vh - 130px), 610px);
+  margin: auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(37, 38, 58, 0.18);
+}
+
+/* 왼쪽 브랜드 영역: 보라 메시 배경, Outfit 글자(희미한 CODE 위에 OMOK을 겹침), 아래에는 큰 흑돌과 백돌.
+   글자 크기와 위치는 패널 폭(cqw)에 비례해서, 카드 크기가 달라져도 같은 구도를 유지한다. */
+.title-brand {
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(70% 52% at 88% 8%, rgba(124, 108, 255, 0.42), transparent 62%),
+    radial-gradient(85% 60% at 0% 100%, rgba(14, 8, 64, 0.9), transparent 62%),
+    linear-gradient(160deg, #3d36ab 0%, #2a2381 48%, #16114a 100%);
+}
+
+.brand-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.title-brand-ghost,
+.title-brand-name {
+  position: absolute;
+  margin: 0;
+  font-family: 'Outfit', var(--font-sans);
+  font-size: 28.2cqw;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+
+.title-brand-ghost {
+  left: 6.4cqw;
+  top: 10cqw;
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.title-brand-name {
+  left: 6.8cqw;
+  top: 22.9cqw;
+  color: #fff;
+}
+
+.title-brand-tagline {
+  position: absolute;
+  left: 8.9cqw;
+  top: 56.8cqw;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: max(13px, 2.86cqw);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  opacity: 0.92;
+}
+
+.title-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 9%;
+  background: var(--card);
+}
+
+.auth-inline,
+.title-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(440px, 100%);
+  font-family: var(--font-sans);
+}
+
+.auth-inline-title,
+.title-menu-name {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 20px;
+  font-size: 1.08rem;
+}
+
+.menu-btn small {
+  font-size: 0.88rem;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.menu-btn-admin {
+  border-style: dashed;
+}
+
+.title-logout {
+  align-self: flex-end;
+  margin-top: 4px;
+}
+
+/* 호버한 메뉴 칸은 포인트 색으로 채운다 */
+.menu-btn.btn-outline:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.menu-btn.btn-outline:hover:not(:disabled) small {
+  opacity: 0.9;
+}
+
+@media (max-width: 760px) {
+  .title-split {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    height: auto;
+  }
+  .title-brand {
+    aspect-ratio: 560 / 420;
+  }
+  .brand-art {
+    opacity: 0.5;
+  }
+}
+
+/* 코드 카드 제목줄의 저장 상태 */
+.save-state {
+  font: 500 0.72rem var(--font-sans);
+  color: var(--faint);
+}
+
+/* 상단 로고 글자: 시작 화면 왼쪽과 같은 Outfit 800. CODE는 연하게, OMOK은 진하게 */
+.logo-text {
+  font-family: 'Outfit', var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.logo-code {
+  margin-right: 0.14em;
+  color: rgba(91, 91, 214, 0.5);
 }

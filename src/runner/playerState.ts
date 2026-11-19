@@ -13,12 +13,14 @@ export function buildPlayerState(game: Game, color: Color): PlayerState {
     move: [h.move.row, h.move.col] as [number, number],
   }))
   const last = game.history[game.history.length - 1]
+  const mine = [...game.history].reverse().find((h) => h.color === color)
 
   return {
     board,
     my_color: colorName(color),
     move_number: game.history.length,
     last_move: last ? [last.move.row, last.move.col] : null,
+    my_last_move: mine ? [mine.move.row, mine.move.col] : null,
     history,
   }
 }

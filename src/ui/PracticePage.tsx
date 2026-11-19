@@ -18,12 +18,14 @@ import { runGame } from '../runner/runGame'
 import type { GameEvent } from '../runner/types'
 import Board from './Board'
 import CodeEditor from './CodeEditor'
+import FunctionHelp from './FunctionHelp'
 import LogPanel from './LogPanel'
 import { RuleThumb } from './RuleBoard'
 import ResultModal from './ResultModal'
 import RuleModal from './RuleModal'
 import { SCENES } from './ruleScenes'
-import { loadCode, saveCode } from './storage'
+import { PRACTICE_SLOT } from '../storage/cloud'
+import { useCloudCode } from '../storage/useCloudCode'
 
 type ColorChoice = 'coin' | 'black' | 'white'
 type Phase = 'idle' | 'preparing' | 'running'
@@ -47,7 +49,8 @@ const newHardWorker = () =>
 
 
 export default function PracticePage() {
-  const [code, setCode] = useState(() => loadCode())
+  // 코드는 이 계정에 저장된다(저장한 적이 없으면 시작 코드)
+  const { code, setCode, ready, saveState, loadError, saveNow } = useCloudCode(PRACTICE_SLOT, STARTER_CODE)
   const [colorChoice, setColorChoice] = useState<ColorChoice>('coin')
   const [level, setLevel] = useState<Difficulty>('medium')
   // 속도 슬라이더의 위치(SPEEDS의 인덱스). 실행 중에도 바꿀 수 있다
@@ -76,12 +79,6 @@ export default function PracticePage() {
   const pythonRef = useRef<PythonPlayer | null>(null)
   const aiRef = useRef<AiPlayer | null>(null)
   const controllerRef = useRef<AbortController | null>(null)
-
-  // 코드는 입력이 멈춘 뒤 저장한다
-  useEffect(() => {
-    const timer = setTimeout(() => saveCode(code), 300)
-    return () => clearTimeout(timer)
-  }, [code])
 
   // 화면을 떠날 때 진행 중인 대국과 Worker를 모두 정리한다
   useEffect(() => {
@@ -115,7 +112,7 @@ export default function PracticePage() {
     controllerRef.current = controller
     const isCurrent = () => controllerRef.current === controller && !controller.signal.aborted
 
-    saveCode(code)
+    void saveNow()
     resetView()
     setPhase('preparing')
     append([{ kind: 'info', text: 'Python 준비 중… 처음에는 몇 초 걸립니다.' }])
@@ -198,10 +195,13 @@ export default function PracticePage() {
       <section className="card card-code" aria-label="코드 작성">
         <h4 className="card-title card-title-file">
           <span>code.py</span>
+          <span className="save-state" role="status">
+            {!ready ? '불러오는 중…' : loadError ? '불러오지 못했습니다' : saveState === 'saving' ? '저장 중…' : saveState === 'saved' ? '저장됨' : saveState === 'error' ? '저장 실패' : ''}
+          </span>
           <button
             type="button"
             className="btn-reset"
-            disabled={busy}
+            disabled={busy || !ready}
             onClick={() => setCode(STARTER_CODE)}
             title="예제 코드로 되돌립니다"
           >
@@ -209,23 +209,9 @@ export default function PracticePage() {
           </button>
         </h4>
 
-        <details className="help" open>
-          <summary>함수 작성법</summary>
-          <ul className="help-body">
-            <li>
-              <code>state["board"]</code> 게임판 (0 빈 칸 · 1 나의 돌 · 2 상대의 돌).
-            </li>
-            <li>
-              <code>state["last_move"]</code> 상대의 마지막 수 (행, 열), 첫 수는 <code>None</code>.
-            </li>
-            <li>다음에 둘 자리를 (행, 열)로 반환합니다.</li>
-            <li>규칙을 어기는 수(금수)를 두면 반칙패로 종료됩니다.</li>
-            <li>2초 안에 못 두면 반칙패로 종료됩니다.</li>
-            <li>전역 변수는 게임이 진행되는 동안 유지됩니다.</li>
-          </ul>
-        </details>
+        <FunctionHelp />
 
-        <CodeEditor value={code} onChange={setCode} disabled={busy} fontSize={codeSize}>
+        <CodeEditor value={code} onChange={setCode} disabled={busy || !ready} fontSize={codeSize}>
             <div className="zoom" role="group" aria-label="코드 글자 크기">
               <button
                 type="button"

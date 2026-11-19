@@ -1,40 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { AccountProvider, useAccount } from '../auth/AccountContext'
+import { clearLegacyLocalData } from '../storage/cloud'
+import AdminPage from './AdminPage'
 import PracticePage from './PracticePage'
+import TournamentPage from './TournamentPage'
 import TitlePage from './TitlePage'
+import TutorialPage from './TutorialPage'
 import './ui.css'
 
-type Screen = 'title' | 'practice'
+type Screen = 'title' | 'tutorial' | 'practice' | 'tournament' | 'admin'
+
+// 코드와 진행 기록은 계정에 저장한다. 이 컴퓨터에 남아 있던 예전 데이터는 다른 계정에 섞이지 않게 지운다.
+clearLegacyLocalData()
 
 export default function App() {
+  return (
+    <AccountProvider>
+      <Shell />
+    </AccountProvider>
+  )
+}
+
+function Shell() {
   const [screen, setScreen] = useState<Screen>('title')
+  const account = useAccount()
+  const isAdmin = account?.role === 'admin'
+
+  // 로그인해야 쓸 수 있다. 로그아웃하거나 관리자 권한을 잃으면 처음 화면으로 돌아간다
+  useEffect(() => {
+    if (screen !== 'title' && !account) setScreen('title')
+    else if (screen === 'admin' && !isAdmin) setScreen('title')
+  }, [screen, account, isAdmin])
 
   return (
     <div className="app">
       <header className="topbar">
         <button type="button" className="logo" onClick={() => setScreen('title')} aria-label="처음 화면으로">
           <span className="logo-mark" aria-hidden="true" />
-          AI 오목
+          <span className="logo-text">
+            <span className="logo-code">CODE</span> OMOK
+          </span>
         </button>
-        <nav className="modes" aria-label="모드">
-          <button
-            type="button"
-            className={screen === 'practice' ? 'mode on' : 'mode'}
-            aria-current={screen === 'practice' ? 'page' : undefined}
-            onClick={() => setScreen('practice')}
-          >
-            연습
+        {screen !== 'title' && (
+          <button type="button" className="topbar-back" onClick={() => setScreen('title')}>
+            ← 처음으로
           </button>
-          <button type="button" className="mode" disabled>
-            토너먼트 · 준비 중
-          </button>
-        </nav>
+        )}
       </header>
 
       <main className="main">
-        {screen === 'practice' ? (
+        {account && screen === 'admin' && isAdmin ? (
+          <AdminPage />
+        ) : account && screen === 'practice' ? (
           <PracticePage />
+        ) : account && screen === 'tournament' ? (
+          <TournamentPage />
+        ) : account && screen === 'tutorial' ? (
+          <TutorialPage />
         ) : (
-          <TitlePage onStartPractice={() => setScreen('practice')} />
+          <TitlePage
+            onStartTutorial={() => setScreen('tutorial')}
+            onStartPractice={() => setScreen('practice')}
+            onStartTournament={() => setScreen('tournament')}
+            onStartAdmin={() => setScreen('admin')}
+          />
         )}
       </main>
 

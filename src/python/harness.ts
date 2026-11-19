@@ -66,8 +66,9 @@ def omok_choose(state_json):
     if not callable(fn):
         return _fail("missing-function", _missing_message(_ns or {}))
     state = json.loads(state_json)
-    if state["last_move"] is not None:
-        state["last_move"] = tuple(state["last_move"])
+    for key in ("last_move", "my_last_move"):
+        if state[key] is not None:
+            state[key] = tuple(state[key])
 
     buf = io.StringIO()
     old = sys.stdout
