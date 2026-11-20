@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { cloneBoard, placeStone } from '../engine/board'
 import type { Board as BoardState, Move } from '../engine/types'
 import { PythonPlayer } from '../python/PythonPlayer'
@@ -9,15 +8,24 @@ import type { LogLine } from '../runner/logFormat'
 import { runGame } from '../runner/runGame'
 import { PlayerFailureError } from '../runner/types'
 import type { GameEvent } from '../runner/types'
-import { LEVELS } from '../tutorial/levels'
+import { LEVELS, resolveLevel } from '../tutorial/levels'
 import { DIRECTION_LABEL } from '../tutorial/levels'
-import type { FindWinLevel, LineLevel, TutorialLevel } from '../tutorial/levels'
-import { buildLevelBoard, buildLevelState, buildPreviewBoard, judgeLineResult, judgeMove } from '../tutorial/judge'
+import type {
+  BlockLevel,
+  DecideLevel,
+  FindWinLevel,
+  LineLevel,
+  OpenFourLevel,
+  TutorialLevel,
+  WinInTwoLevel,
+} from '../tutorial/levels'
+import { buildLevelBoard, buildLevelState, buildPreviewBoard, judgeBlock, judgeDecide, judgeLineResult, judgeMove, judgeOpenFour, judgeWinInTwo } from '../tutorial/judge'
 import { createPassivePlayer } from '../tutorial/passiveAi'
 import Board from './Board'
 import ClearModal from './ClearModal'
 import CodeEditor from './CodeEditor'
 import { DEFAULT_CODE_SIZE, MAX_CODE_SIZE, MIN_CODE_SIZE, stepCodeSize } from './codeZoom'
+import ForbiddenRules from './ForbiddenRules'
 import FunctionHelp from './FunctionHelp'
 import LogPanel from './LogPanel'
 import { useAccount } from '../auth/AccountContext'
@@ -32,8 +40,37 @@ const newPythonWorker = () =>
 /** 튜토리얼: 먼저 레벨 목록을 보여 주고, 고른 레벨의 문제 화면으로 들어간다. */
 export default function TutorialPage() {
   // 열려 있는 레벨의 인덱스. null이면 레벨 목록
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  // 브라우저 기록(history.state.level)에도 남겨서 뒤로가기로 레벨 목록에 돌아올 수 있다
+  const [openIndex, setOpenIndex] = useState<number | null>(() => {
+    const saved = (history.state as { level?: number } | null)?.level
+    return typeof saved === 'number' && saved >= 0 && saved < LEVELS.length ? saved : null
+  })
   const account = useAccount()
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const saved = (e.state as { level?: number } | null)?.level
+      setOpenIndex(typeof saved === 'number' && saved >= 0 && saved < LEVELS.length ? saved : null)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  /** 레벨 목록에서 레벨을 연다 (뒤로가기로 목록에 돌아올 수 있게 기록을 남긴다) */
+  const openLevel = (index: number) => {
+    history.pushState({ ...(history.state as object), level: index }, '')
+    setOpenIndex(index)
+  }
+  /** 다음 레벨로 (기록은 새로 쌓지 않고 바꾼다) */
+  const nextLevel = (index: number) => {
+    history.replaceState({ ...(history.state as object), level: index }, '')
+    setOpenIndex(index)
+  }
+  /** 레벨 목록으로 */
+  const backToList = () => {
+    if ((history.state as { level?: number } | null)?.level !== undefined) history.back()
+    else setOpenIndex(null)
+  }
   // 통과한 레벨은 이 계정에 저장된다. 불러오기 전에는 null (새 계정은 빈 목록)
   const [cleared, setCleared] = useState<Set<number> | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -65,7 +102,7 @@ export default function TutorialPage() {
   if (openIndex === null) {
     return (
       <>
-        <LevelList cleared={cleared} onSelect={setOpenIndex} />
+        <LevelList cleared={cleared} onSelect={openLevel} />
         {loadError && (
           <p className="admin-error" role="alert">
             {loadError}
@@ -84,11 +121,19 @@ export default function TutorialPage() {
         setCleared((prev) => new Set(prev ?? []).add(level.id))
         if (account) void markLevelCleared(account.userId, level.id).catch(() => setLoadError('통과 기록을 저장하지 못했습니다.'))
       }}
-      onBack={() => setOpenIndex(null)}
-      onNext={hasNext ? () => setOpenIndex(openIndex + 1) : null}
+      onBack={backToList}
+      onNext={hasNext ? () => nextLevel(openIndex + 1) : null}
     />
   )
 }
+
+/** 커버플로 무대의 세로 여백(px): 카드 위(제목이 들어가는 자리) / 카드 아래(그림자가 잘리지 않게 두는 여백). 같은 값이라 카드가 상하 가운데에 온다 */
+const GAP_TITLE_CARD = 64
+const GAP_STAGE_BOTTOM = 64
+
+/** 미션 글을 문장(마침표)마다 나눈다. 카드 안에서 한 문장씩 줄을 바꿔 보여 준다. */
+const sentencesOf = (mission: string): string[] =>
+  (mission.match(/[^.]+\.|[^.]+$/g) ?? [mission]).map((sentence) => sentence.trim())
 
 /** 레벨 목록: 가운데 카드가 크게, 양옆 카드는 비스듬히 물러나 보이는 커버플로 모양. */
 function LevelList({ cleared, onSelect }: { cleared: Set<number>; onSelect: (index: number) => void }) {
@@ -98,11 +143,88 @@ function LevelList({ cleared, onSelect }: { cleared: Set<number>; onSelect: (ind
     return next === -1 ? 0 : next
   })
   const move = (delta: number) => setFocus((f) => Math.min(LEVELS.length - 1, Math.max(0, f + delta)))
-  const current = LEVELS[focus]
+  const sectionRef = useRef<HTMLElement | null>(null)
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
+  // 화면에 그려진 (소수) 위치. 카드 모양은 이 값으로 매 프레임 계산해서 부드럽게 따라가게 한다
+  const posRef = useRef(focus)
+
+  /** 위치 pos(소수 가능)에 맞춰 카드마다 이동, 기울기, 깊이, 투명도를 정한다 */
+  const apply = useCallback((pos: number) => {
+    cardRefs.current.forEach((el, i) => {
+      if (!el) return
+      const gap = el.offsetWidth * 0.8
+      const o = i - pos
+      const a = Math.abs(o)
+      el.style.transform = `translateX(${o * gap}px) translateZ(${-Math.min(a, 3) * 180}px) rotateY(${-Math.max(-1, Math.min(1, o)) * 45}deg)`
+      el.style.opacity = String(Math.max(0, Math.min(1, 3 - a)))
+      el.style.zIndex = String(Math.round(100 - a * 10))
+      el.style.filter = `brightness(${1 - 0.07 * Math.min(a, 1)})`
+      el.style.pointerEvents = a > 2.2 ? 'none' : 'auto'
+    })
+  }, [])
+
+  // 무대 높이를 (정사각형인) 카드 높이에 맞춘다
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  const fit = useCallback(() => {
+    const card = cardRefs.current[0]
+    const stage = stageRef.current
+    if (!card || !stage) return
+    stage.style.setProperty('--cf-top', `${GAP_TITLE_CARD}px`)
+    stage.style.height = `${GAP_TITLE_CARD + card.offsetHeight + GAP_STAGE_BOTTOM}px`
+  }, [])
+
+  useLayoutEffect(() => {
+    fit()
+    apply(posRef.current)
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [apply, fit])
+
+  // 가운데로 올 카드(focus)를 향해 위치를 조금씩 옮긴다 (이어서 넘겨도 끊기지 않는다)
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let raf = 0
+    let last = performance.now()
+    const tick = (now: number) => {
+      const dt = Math.min(now - last, 50)
+      last = now
+      const diff = focus - posRef.current
+      if (reduced || Math.abs(diff) < 0.002) {
+        posRef.current = focus
+        apply(focus)
+        return
+      }
+      posRef.current += diff * (1 - Math.exp(-dt / 100))
+      apply(posRef.current)
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [focus, apply])
+
+  // 마우스 휠, 트랙패드 스크롤로 넘긴다. 휠 한 번(트랙패드는 한 번 쓸기)에 한 장씩 넘어가도록
+  // 짧은 시간 동안 이어지는 이벤트는 무시한다. 페이지가 같이 스크롤되지 않게 passive: false로 단다.
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    let lastStep = 0
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+      if (Math.abs(delta) < 4) return
+      const now = performance.now()
+      if (now - lastStep < 130) return
+      lastStep = now
+      setFocus((f) => Math.min(LEVELS.length - 1, Math.max(0, f + Math.sign(delta))))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
 
   return (
-    <div className="title-stage">
+    <div className="title-stage cf-page">
       <section
+        ref={sectionRef}
         className="cf"
         aria-label="레벨 목록"
         tabIndex={0}
@@ -112,63 +234,44 @@ function LevelList({ cleared, onSelect }: { cleared: Set<number>; onSelect: (ind
           else if (e.key === 'Enter' && e.target === e.currentTarget) onSelect(focus)
         }}
       >
-        <h1 className="title-name cf-title">튜토리얼</h1>
-        <p className="title-tagline">레벨을 골라 풀어 보세요</p>
+        <div className="cf-top">
+          <h1>튜토리얼</h1>
+        </div>
 
-        <div className="cf-stage">
+        <div className="cf-stage" ref={stageRef}>
           {LEVELS.map((l, i) => {
             const offset = i - focus
-            const abs = Math.abs(offset)
-            const style = {
-              '--o': offset,
-              '--abs': Math.min(abs, 3),
-              '--s': Math.sign(offset),
-              zIndex: 10 - abs,
-              opacity: abs > 2 ? 0 : 1,
-              pointerEvents: abs > 2 ? 'none' : 'auto',
-            } as CSSProperties
+            const done = cleared.has(l.id)
             return (
               <button
                 key={l.id}
+                ref={(el) => {
+                  cardRefs.current[i] = el
+                }}
                 type="button"
                 className={offset === 0 ? 'cf-card cf-card-on' : 'cf-card'}
-                style={style}
                 tabIndex={-1}
-                aria-label={`레벨 ${l.id} ${l.title}${cleared.has(l.id) ? ' (통과)' : ''}`}
+                aria-label={`레벨 ${l.id} ${l.title}${done ? ' (통과)' : ''}`}
                 aria-current={offset === 0 ? 'true' : undefined}
                 onClick={() => (offset === 0 ? onSelect(i) : setFocus(i))}
               >
+                <span className="cf-meta">
+                  <span className={done ? 'level-no level-no-done' : 'level-no'}>{done ? '✓' : l.id}</span>
+                  <b>{l.title}</b>
+                  {l.randomColor && <span className="cf-random">랜덤 색</span>}
+                </span>
                 <span className="cf-board" aria-hidden="true">
                   <Board board={buildPreviewBoard(l)} lastMove={null} winningLine={null} foulMove={null} />
+                  {done && <span className="cf-done">✓</span>}
                 </span>
-                <span className="cf-meta">
-                  <span className={cleared.has(l.id) ? 'level-no level-no-done' : 'level-no'}>
-                    {cleared.has(l.id) ? '✓' : l.id}
-                  </span>
-                  <b>{l.title}</b>
+                <span className="cf-desc">
+                  {sentencesOf(l.mission).map((sentence) => (
+                    <span key={sentence}>{sentence}</span>
+                  ))}
                 </span>
               </button>
             )
           })}
-        </div>
-
-        <p className="cf-mission">{current.mission}</p>
-        <div className="cf-controls">
-          <button type="button" className="btn btn-outline" onClick={() => move(-1)} disabled={focus === 0} aria-label="이전 레벨">
-            ←
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => onSelect(focus)}>
-            시작
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline"
-            onClick={() => move(1)}
-            disabled={focus === LEVELS.length - 1}
-            aria-label="다음 레벨"
-          >
-            →
-          </button>
         </div>
       </section>
     </div>
@@ -198,6 +301,8 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
   const [lines, setLines] = useState<LogLine[]>([])
   const [clearMessage, setClearMessage] = useState<string | null>(null)
   const [passed, setPassed] = useState(false)
+  // 랜덤 색 레벨에서 이번 실행에 정해진 내 돌 색. 실행하기 전에는 null
+  const [playedColor, setPlayedColor] = useState<'black' | 'white' | null>(null)
 
   const pythonRef = useRef<PythonPlayer | null>(null)
   const runIdRef = useRef(0)
@@ -211,8 +316,8 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
     }
   }, [])
 
-  function resetView() {
-    setBoard(buildLevelBoard(level))
+  function resetView(shown: TutorialLevel = level) {
+    setBoard(buildLevelBoard(shown))
     setLastMove(null)
     setWinningLine(null)
     setFoulMove(null)
@@ -228,7 +333,13 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
     const append = (more: LogLine[]) => setLines((prev) => [...prev, ...more])
 
     void saveNow()
-    resetView()
+    // 랜덤 색 레벨은 실행할 때마다 내 돌 색을 새로 정한다
+    const played = level.randomColor ? resolveLevel(level, Math.random() < 0.5 ? 'black' : 'white') : level
+    setPlayedColor(level.randomColor ? played.myColor : null)
+    resetView(played)
+    if (level.randomColor) {
+      append([{ kind: 'info', text: `이번 실행: 내 돌은 ${played.myColor === 'black' ? '흑' : '백'}입니다.` }])
+    }
     setPhase('preparing')
     append([{ kind: 'info', text: 'Python 준비 중… 처음에는 몇 초 걸립니다.' }])
 
@@ -251,7 +362,7 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
     }
 
     setPhase('running')
-    const lv = level
+    const lv = played
     if (lv.kind === 'make-line') {
       await runLine(lv, python, runId)
     } else {
@@ -268,7 +379,7 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
   }
 
   /** 한 번 불러 그 한 수로 판정한다 */
-  async function runFindWin(lv: FindWinLevel, python: PythonPlayer, runId: number) {
+  async function runFindWin(lv: FindWinLevel | BlockLevel | OpenFourLevel | DecideLevel | WinInTwoLevel, python: PythonPlayer, runId: number) {
     const isCurrent = () => runIdRef.current === runId
     const append = (more: LogLine[]) => setLines((prev) => [...prev, ...more])
     try {
@@ -278,7 +389,16 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
         .split('\n')
         .filter((l) => l.trim() !== '')
         .map((l) => ({ kind: 'print' as const, text: `print: ${l}` }))
-      const verdict = judgeMove(lv, choice.move)
+      const verdict =
+        lv.kind === 'block'
+          ? judgeBlock(lv, choice.move)
+          : lv.kind === 'open-four'
+            ? judgeOpenFour(lv, choice.move)
+            : lv.kind === 'decide'
+              ? judgeDecide(lv, choice.move)
+              : lv.kind === 'win-in-two'
+                ? judgeWinInTwo(lv, choice.move)
+                : judgeMove(lv, choice.move)
       setBoard(verdict.board)
       setLastMove(verdict.foulMove ? null : choice.move)
       setWinningLine(verdict.line)
@@ -421,7 +541,16 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
         <div className="ctrl">
           <p>{level.mission}</p>
           <p>
-            내 돌: <b>{level.myColor === 'black' ? '흑' : '백'}</b>
+            내 돌:{' '}
+            <b>
+              {level.randomColor
+                ? playedColor
+                  ? `${playedColor === 'black' ? '흑' : '백'} (실행할 때마다 랜덤)`
+                  : '랜덤 (실행할 때마다 흑 또는 백)'
+                : level.myColor === 'black'
+                  ? '흑'
+                  : '백'}
+            </b>
           </p>
           {busy ? (
             <button type="button" className="btn btn-stop" onClick={stop}>
@@ -438,10 +567,9 @@ function LevelPlay({ level, onCleared, onBack, onNext }: LevelPlayProps) {
             </button>
           )}
           {passed && !onNext && <p>지금 준비된 레벨을 모두 통과했습니다.</p>}
-          <button type="button" className="btn btn-outline" disabled={busy} onClick={onBack}>
-            ← 레벨 목록
-          </button>
         </div>
+
+        <ForbiddenRules />
       </section>
       {clearMessage && (
         <ClearModal

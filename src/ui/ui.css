@@ -1544,12 +1544,16 @@ body {
 }
 
 /* 튜토리얼 레벨 목록: 커버플로 */
+/* 레벨 목록(커버플로)은 본문의 상하 가운데에 놓이고, 제목은 이전처럼 본문 위쪽에 둔다 */
+.cf-page {
+  position: relative;
+  overflow-x: clip; /* 100vw 무대가 가로 스크롤을 만들지 않게 */
+}
+
 .cf {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: min(1160px, 100%);
-  text-align: center;
+  width: min(1040px, 100%);
   outline: none;
 }
 
@@ -1558,112 +1562,156 @@ body {
   outline-offset: 3px;
 }
 
-.cf-title {
-  font-size: 1.8rem;
+/* 제목은 본문(.cf-page) 위쪽에 따로 놓는다. 그래야 카드가 상하 가운데에 오면서 제목은 위쪽 그대로다 */
+.cf-top {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  pointer-events: none;
 }
 
+.cf-top h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+/* 카드의 이동, 기울기, 투명도, 밝기는 TutorialPage의 LevelList가 매 프레임 계산해서 넣는다 */
 .cf-stage {
   position: relative;
-  width: 100%;
-  height: 540px;
-  margin-top: 10px;
+  /* 양옆 카드가 잘리지 않게 무대를 화면 전체 폭으로 넓힌다 (가운데 정렬된 .cf 밖으로 뻗음) */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: 450px; /* 실제 높이는 카드 높이에 맞춰 TutorialPage가 정한다 */
   perspective: 1000px;
   overflow: hidden;
 }
 
 .cf-card {
-  --gap: 300px;
+  --w: 520px;
   position: absolute;
-  top: 16px;
+  top: var(--cf-top, 48px);
   left: 50%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: 380px;
-  margin-left: -190px;
-  padding: 12px;
+  gap: 9px;
+  width: var(--w);
+  height: var(--w); /* 카드는 정사각형. 판은 남는 공간에 맞춰 줄어든다 */
+  margin-left: calc(var(--w) / -2);
+  padding: 11px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--card);
-  box-shadow: 0 10px 30px rgba(37, 38, 58, 0.16);
+  box-shadow: 0 10px 28px rgba(37, 38, 58, 0.16);
   font: inherit;
+  text-align: left;
   color: var(--ink);
   cursor: pointer;
-  filter: brightness(0.93);
-  transform: translateX(calc(var(--o) * var(--gap))) translateZ(calc(var(--abs) * -180px))
-    rotateY(calc(var(--s) * -45deg));
+  will-change: transform, opacity;
   transition:
-    transform 0.45s cubic-bezier(0.22, 0.8, 0.3, 1),
-    opacity 0.3s,
-    filter 0.3s;
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .cf-card-on {
   border-color: var(--accent);
-  filter: none;
   box-shadow: 0 16px 40px rgba(76, 72, 196, 0.28);
 }
 
+.cf-board {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 .cf-board .board {
+  width: 100%;
+  height: 100%;
   max-height: none;
   border-radius: 8px;
+}
+
+.cf-done {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .cf-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  text-align: left;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  text-align: center;
 }
 
-.cf-mission {
-  max-width: 520px;
-  min-height: 3em;
-  margin: 8px 0 12px;
-  font-size: 0.9rem;
+.cf-meta b {
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+
+/* 내 돌 색이 실행마다 바뀌는 레벨 표시 */
+.cf-random {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e9e9fb;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* 카드 안, 판 아래에 들어가는 미션 설명. 문장마다 한 줄씩 */
+.cf-desc {
+  display: block;
+  padding: 0 4px 2px;
+  text-align: center;
+  font-size: 0.76rem;
   line-height: 1.5;
   color: var(--muted);
 }
 
-.cf-controls {
-  display: flex;
-  gap: 10px;
-}
-
-.cf-controls .btn {
-  min-width: 48px;
+.cf-desc span {
+  display: block;
 }
 
 .level-no {
   flex: none;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--chip);
   font-weight: 800;
+  font-size: 0.85rem;
 }
 
 .level-no-done {
-  background: var(--accent);
+  background: var(--success);
   color: #fff;
 }
 
 @media (max-width: 560px) {
   .cf-card {
-    --gap: 180px;
-    width: 300px;
-    margin-left: -150px;
-  }
-  .cf-stage {
-    height: 460px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cf-card {
-    transition: none;
+    --w: 340px;
   }
 }
 

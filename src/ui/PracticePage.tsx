@@ -20,10 +20,8 @@ import Board from './Board'
 import CodeEditor from './CodeEditor'
 import FunctionHelp from './FunctionHelp'
 import LogPanel from './LogPanel'
-import { RuleThumb } from './RuleBoard'
 import ResultModal from './ResultModal'
-import RuleModal from './RuleModal'
-import { SCENES } from './ruleScenes'
+import ForbiddenRules from './ForbiddenRules'
 import { PRACTICE_SLOT } from '../storage/cloud'
 import { useCloudCode } from '../storage/useCloudCode'
 
@@ -72,8 +70,6 @@ export default function PracticePage() {
   const [outcome, setOutcome] = useState<string | null>(null)
   // 대국이 끝나면 결과 팝업으로 보여준다. 닫으면 null이 된다
   const [result, setResult] = useState<ResultSummary | null>(null)
-  // 금수 설명 팝업: 열려 있는 장면의 id
-  const [openRule, setOpenRule] = useState<string | null>(null)
   const [lines, setLines] = useState<LogLine[]>([])
 
   const pythonRef = useRef<PythonPlayer | null>(null)
@@ -186,7 +182,6 @@ export default function PracticePage() {
   }
 
   const busy = phase !== 'idle'
-  const openScene = SCENES.find((s) => s.id === openRule) ?? null
   const blackName = names?.black ?? '흑'
   const whiteName = names?.white ?? '백'
 
@@ -350,38 +345,7 @@ export default function PracticePage() {
           )}
         </div>
 
-        <h4 className="card-title">
-          <span>규칙 · 금지된 수</span>
-        </h4>
-        <div className="rules">
-          <ul className="rules-notes">
-            <li>금수는 흑에게만 적용됩니다.</li>
-            <li>금수 자리에 두면 반칙패 입니다.</li>
-            <li>아래 블록을 누르면 상세 설명을 확인할 수 있습니다.</li>
-          </ul>
-          <ul className="rule-list">
-            {SCENES.map((scene) => (
-              <li key={scene.id}>
-                <button
-                  type="button"
-                  className="rule-card"
-                  aria-haspopup="dialog"
-                  aria-label={scene.title + ' 그림 설명 열기'}
-                  onClick={() => setOpenRule(scene.id)}
-                >
-                  <span className="rule-thumb" aria-hidden="true">
-                    <RuleThumb scene={scene} />
-                  </span>
-                  <span className="rule-text">
-                    <b>{scene.title}</b>
-                    <span>{scene.summary}</span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {openScene && <RuleModal scene={openScene} onClose={() => setOpenRule(null)} />}
+        <ForbiddenRules />
       </section>
 
       {result && (
