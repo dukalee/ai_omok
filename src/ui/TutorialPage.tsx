@@ -158,7 +158,7 @@ function LevelList({ cleared, onSelect }: { cleared: Set<number>; onSelect: (ind
             ←
           </button>
           <button type="button" className="btn btn-primary" onClick={() => onSelect(focus)}>
-            레벨 {current.id} 시작
+            시작
           </button>
           <button
             type="button"

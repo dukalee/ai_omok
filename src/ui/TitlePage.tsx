@@ -30,7 +30,7 @@ export default function TitlePage({ onStartTutorial, onStartPractice, onStartTou
       <section className="title-side">
         {account ? (
           <div className="title-menu">
-            <h2 className="title-menu-name">{account.name}님</h2>
+            <h2 className="title-menu-name">안녕하세요, {account.name}님</h2>
             <button type="button" className="btn btn-outline btn-block menu-btn" onClick={onStartTutorial}>
               <span>튜토리얼</span>
               <small>규칙 익히기</small>

@@ -24,7 +24,7 @@ describe('ID', () => {
   })
 })
 
-describe('이름과 비밀번호', () => {
+describe('이름과 PASSWORD', () => {
   test('이름은 1~20자 (앞뒤 공백 제외)', () => {
     expect(validateName('홍길동')).toBeNull()
     expect(validateName('   ')).not.toBeNull()
@@ -32,7 +32,7 @@ describe('이름과 비밀번호', () => {
     expect(validateName('가'.repeat(21))).not.toBeNull()
   })
 
-  test('비밀번호는 6자 이상', () => {
+  test('PASSWORD는 6자 이상', () => {
     expect(validatePassword('12345')).not.toBeNull()
     expect(validatePassword('123456')).toBeNull()
   })

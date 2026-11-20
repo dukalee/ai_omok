@@ -28,5 +28,5 @@ export function validateName(name: string): string | null {
 }
 
 export function validatePassword(password: string): string | null {
-  return password.length >= PASSWORD_MIN ? null : `비밀번호는 ${PASSWORD_MIN}자 이상이어야 합니다.`
+  return password.length >= PASSWORD_MIN ? null : `PASSWORD는 ${PASSWORD_MIN}자 이상이어야 합니다.`
 }

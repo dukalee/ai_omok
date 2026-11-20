@@ -21,7 +21,7 @@ const NOT_CONFIGURED = '로그인 서버가 설정되지 않았습니다. (.env.
 /** Supabase 오류를 학습자가 읽을 문구로 바꾼다 */
 function explain(error: { message: string; code?: string }, mode: 'login' | 'signup'): string {
   const text = error.message.toLowerCase()
-  if (mode === 'login' && text.includes('invalid login')) return 'ID 또는 비밀번호가 맞지 않습니다.'
+  if (mode === 'login' && text.includes('invalid login')) return 'ID 또는 PASSWORD가 맞지 않습니다.'
   if (mode === 'signup' && (text.includes('already registered') || text.includes('already been registered')))
     return '이미 사용 중인 ID입니다.'
   if (text.includes('email not confirmed')) return '이메일 확인이 켜져 있습니다. 관리자에게 문의하세요.'

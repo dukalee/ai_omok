@@ -6,7 +6,7 @@ import { validateId, validateName, validatePassword } from '../auth/credentials'
 type AuthMode = 'login' | 'signup'
 
 /**
- * 시작 화면에 바로 보이는 로그인 / 회원가입 폼. 회원가입에는 ID, 이름, 비밀번호만 받는다.
+ * 시작 화면에 바로 보이는 로그인 / 회원가입 폼. 회원가입에는 ID, 이름, PASSWORD만 받는다.
  * 성공하면 로그인 상태가 바뀌어 시작 화면이 메뉴로 바뀐다(이 폼은 사라진다).
  */
 export default function AuthForm() {
@@ -31,7 +31,7 @@ export default function AuthForm() {
       : !id.trim()
         ? 'ID를 입력하세요.'
         : !password
-          ? '비밀번호를 입력하세요.'
+          ? 'PASSWORD를 입력하세요.'
           : null
     if (problem) {
       setError(problem)
@@ -77,7 +77,7 @@ export default function AuthForm() {
       )}
 
       <label className="auth-field">
-        비밀번호
+        PASSWORD
         <input
           type="password"
           value={password}

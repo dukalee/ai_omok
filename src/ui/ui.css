@@ -2174,15 +2174,19 @@ body {
 }
 
 .title-brand-tagline {
+  /* 제목(OMOK) 아래 가운데. Pretendard 500에 넓은 자간으로 가볍고 현대적인 느낌 */
   position: absolute;
-  left: 8.9cqw;
-  top: 56.8cqw;
+  left: 0;
+  right: 0;
+  top: 51.5cqw;
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: max(13px, 2.86cqw);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  opacity: 0.92;
+  font-family: 'Pretendard', var(--font-sans);
+  font-size: max(12px, 2.6cqw);
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  padding-left: 0.34em; /* 자간이 오른쪽 끝에도 붙어서 가운데가 어긋나는 것을 보정 */
+  text-align: center;
+  color: rgba(255, 255, 255, 0.68); /* 알파로 살짝 투명하게 */
 }
 
 .title-side {
@@ -2205,7 +2209,8 @@ body {
 .auth-inline-title,
 .title-menu-name {
   margin: 0 0 4px;
-  font-size: 1.6rem;
+  word-break: keep-all; /* 이름이 길어 줄이 바뀌어도 단어 중간에서 끊기지 않게 */
+  font-size: 2.24rem;
 }
 
 .menu-btn {

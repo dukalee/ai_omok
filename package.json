@@ -17,6 +17,7 @@
     "@fontsource/ibm-plex-sans-kr": "^5.3.0",
     "@fontsource/nanum-gothic-coding": "^5.3.0",
     "@fontsource/outfit": "^5.3.0",
+    "@fontsource/pretendard": "^5.3.0",
     "@supabase/supabase-js": "^2.119.2",
     "@uiw/react-codemirror": "^4.25.12",
     "react": "^19.3.1",
